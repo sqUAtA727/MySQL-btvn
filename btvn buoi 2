@@ -1,0 +1,53 @@
+/*Tao bang product*/
+create table Products (
+	id int primary key auto_increment,
+    name varchar(225),
+    category varchar(100),
+    price decimal(10,2),
+    stock int
+);
+
+/*Bai tap*/
+/*Cau 2*/
+insert into Products (name, category, price, stock) values
+('Phone', 'Electonic', 10000000, 500),
+('Laptop', 'Electonic', 20000000, 250),
+('PC', 'Electonic', 20000000, 150),
+('Noodles', 'Foods', 2000, 2000),
+('Coca-cola', 'Drinks', 10000, 1000);
+
+/*Cau 3*/
+update Products
+set price = price + price*0.1 
+where id = 2;
+
+/*Cau 4*/
+delete from products 
+where stock = 0;
+
+/*Cau 5*/
+select * from products
+where price = (select min(price) from products);
+
+/*Cau 6*/
+select * from products
+where price = (select max(price) from products);
+
+/*Cau 7*/
+select sum(stock) as Sum, avg(price) as AvgPrice from products;
+
+/*Cau 8*/
+select * from products
+where price > 100
+order by price desc;
+
+/*Cau 9*/
+select * from products
+order by price;
+
+select * from products
+order by price desc;
+
+/*Cau 10*/
+select * from products
+where price > (select avg(price) from products);
