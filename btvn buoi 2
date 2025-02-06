@@ -1,6 +1,6 @@
 /*Tao bang product*/
 create table Products (
-	id int primary key auto_increment,
+    id int primary key auto_increment,
     name varchar(225),
     category varchar(100),
     price decimal(10,2),
