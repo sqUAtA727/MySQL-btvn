@@ -1,0 +1,95 @@
+-- Tao database
+create database LibraryManagement;
+use LibraryManagement;
+
+-- Tao table
+create table authors (
+	AuthorID int primary key auto_increment,
+    AuthorName varchar(100) not null
+);
+
+create table books (
+	BookID int primary key auto_increment,
+    Title varchar(200) not null,
+    AuthorID int,
+    foreign key (AuthorID) references authors(AuthorID),
+    PublishedYear year not null
+);
+
+create table members (
+	MemberID int primary key auto_increment,
+    MemberName varchar(100) not null,
+    JoinDate date not null
+);
+
+create table loans (
+	LoanID int primary key auto_increment,
+    BookID int,
+    foreign key (BookID) references books(BookID),
+    MemberID int,
+    foreign key (MemberID) references members(MemberID),
+    LoanDate date not null,
+    ReturnDate date
+);
+
+-- insert
+insert into authors (AuthorName) values
+('A'),
+('B'),
+('C'),
+('D'),
+('E');
+
+insert into books (Title, AuthorID, PublishedYear) values
+('Tiêu đề 1', 1, 2005),
+('Tiêu đề 2', 2, 2010),
+('Tiêu đề 3', 3, 2015),
+('Tiêu đề 4', 4, 2019),
+('Tiêu đề 5', 5, 2020);
+
+insert into members (MemberName, JoinDate) values
+('P', '2020-07-27'),
+('L', '1727-07-27'),
+('K', '2010-08-27'),
+('H', '2002-04-17'),
+('M', '1999-01-29');
+
+insert into loans (BookID, MemberID, LoanDate, ReturnDate) values
+(1, 1, '2021-07-27', '2021-08-28'),
+(2, 2, '2022-07-27', '2023-08-28'),
+(3, 3, '2020-07-27', '2024-08-28'),
+(4, 4, '2019-07-27', '2021-08-28'),
+(5, 5, '2025-07-27', '2024-08-28');
+
+-- Cau 4
+select books.BookID, books.Title, books.PublishedYear, authors.AuthorName from books
+join authors
+on books.AuthorID = authors.AuthorID
+where books.PublishedYear>2010;
+
+-- Cau 5 + 6
+select members.MemberName, count(loans.BookID) from members
+join loans
+on members.MemberID = loans.MemberID
+group by members.MemberID;
+
+-- Cau 7
+select members.MemberName, count(loans.BookID) from members
+join loans
+on members.MemberID = loans.MemberID
+group by members.MemberID
+having count(loans.BookID) > 2;
+
+-- Cau 8
+select min(PublishedYear) from books;
+
+-- Cau 9 
+select * from members
+where JoinDate > '2020-01-01' and JoinDate < '2022-12-31';
+
+-- Cau 10 
+select * from authors
+where AuthorName in ('a', '&a&', 'a&', '&a');
+
+-- Cau 11
+select PublishedYear, count(BookID) from books group by PublishedYear;
