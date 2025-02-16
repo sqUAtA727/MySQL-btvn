@@ -1,0 +1,126 @@
+-- 1
+create database QuanLySinhVien;
+use QuanLySinhVien;
+
+create table lop_hoc (
+	id int primary key auto_increment,
+    ten_lop VARCHAR(100),
+    khoa VARCHAR(50)
+);
+
+create table sinh_vien (
+	id int primary key auto_increment,
+    ten VARCHAR(100),
+    ma_lop int,
+    foreign key (ma_lop) references lop_hoc(id),
+    diem float
+);
+
+insert into lop_hoc (ten_lop, khoa) values
+('Lop 1', 'K1'),
+('Lop 2', 'K2'),
+('Lop 3', 'K3'),
+('Lop 4', 'K4'),
+('Lop 5', 'K5');
+
+insert into sinh_vien (ten, ma_lop, diem) values
+('Nguyễn Văn 1', 1, 1.1),
+('Nguyễn Văn 2', 2, 3.3),
+('Nguyễn Văn 3', 3, 5.5),
+('Nguyễn Văn 4', 4, 7.7),
+('Nguyễn Văn 5', 5, 9.9);
+
+-- 2
+select max(diem) from sinh_vien;
+
+-- 3
+select ten_lop, avg(diem) from sinh_vien
+join lop_hoc
+on lop_hoc.id = sinh_vien.ma_lop
+group by lop_hoc.id;
+
+-- 4
+select ten_lop, ten, diem from lop_hoc
+join sinh_vien
+on lop_hoc.id = sinh_vien.ma_lop
+where ten_lop = 'Lop 1'
+order by ten;
+
+-- 5
+create view view_diemCaoNhat as
+select ten_lop, max(diem) from sinh_vien
+join lop_hoc 
+on lop_hoc.id = sinh_vien.ma_lop
+group by ten_lop;
+
+-- 6
+-- a
+delimiter $$
+	create procedure GetStudentByScore(in score float)
+    begin
+		declare max_score float;
+        select max(diem) into max_score from sinh_vien;
+		if (max_score < score) then
+			select 'Điểm cao quá đấy' as 'message';
+		else
+			select ten, diem from sinh_vien
+			where diem > score;
+		end if;
+    end $$
+delimiter ;
+
+call GetStudentByScore(5);
+
+-- b
+delimiter $$
+	create procedure UpdateStudentScore(in student_id int, in score float)
+    begin
+		declare check_student int;
+        select id into check_student from sinh_vien
+        where id = student_id;
+		if (check_student is null) then
+			select 'ID không tồn tại kìa nhờn' as 'message';
+		else
+			update sinh_vien
+            set diem = score
+            where id = student_id;
+		end if;
+    end $$
+delimiter ;
+
+call UpdateStudentScore(8, 7.27);
+select * from sinh_vien;
+
+-- c
+delimiter $$
+	create procedure AddStudent(in name varchar(100), class_id int, in score float)
+    begin
+		if (name is null) then
+			select 'Sao lại quên nhập tên thế này haiya' as 'message';
+		else
+			insert into sinh_vien (ten, ma_lop, diem) values
+            (name, class_id, score);
+		end if;
+    end $$
+delimiter ;
+
+call AddStudent(null, 3, 6.27);
+select * from sinh_vien;
+
+-- d 
+delimiter $$
+	create procedure DeleteStudent(in student_id int)
+    begin
+		declare check_student int;
+        select id into check_student from sinh_vien
+        where id = student_id;
+		if (check_student is null) then
+			select 'ID không tồn tại kìa nhờn' as 'message';
+		else
+			delete from sinh_vien
+            where id = student_id;
+		end if;
+    end $$
+delimiter ;
+
+call DeleteStudent(8);
