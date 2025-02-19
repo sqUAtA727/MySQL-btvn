@@ -1,0 +1,184 @@
+-- 2
+delimiter $$
+	create function GetClassByID(class_id int)
+    returns varchar(100) deterministic
+    begin
+		declare class varchar(100);
+		select ten_lop into class from lop_hoc
+        where id = class_id;	
+        return class;
+	end $$	
+delimiter ;
+
+select GetClassByID(2);
+
+-- 3
+delimiter $$
+	create function GetClassSum(class_id int)
+    returns int deterministic
+    begin
+		declare student_sum int;
+		select count(id) into student_sum from sinh_vien
+        where ma_lop = class_id;	
+        return student_sum;
+	end $$	
+delimiter ;
+
+select GetClassSum(3);
+
+-- 4
+delimiter $$
+	create function GetClassAVGScore(class_id int)
+    returns float deterministic
+    begin
+		declare student_avg float;
+		select avg(diem) into student_avg from sinh_vien
+        where ma_lop = class_id;	
+        return ceil(student_avg);
+	end $$	
+delimiter ;
+
+drop function GetClassAVGScore;
+select GetClassAVGScore(3);
+
+-- 5
+delimiter $$
+	create function GetStudentState(student_id int)
+    returns varchar(50)
+    deterministic
+    begin
+		declare student_state varchar(50);
+		select case
+			when diem >= 5 then 'Đạt'
+            when diem <= 5 then 'Nah'
+		end as 'Trạng thái'
+        into student_state from sinh_vien
+        where id = student_id;	
+        return student_state;
+	end $$	
+delimiter ;
+
+select GetStudentState(2);
+
+-- 6
+delimiter $$
+	create function GetClassSumOver8(class_id int)
+    returns int deterministic
+    begin
+		declare student_sum int;
+		select count(id) into student_sum from sinh_vien
+        where ma_lop = class_id and diem > 8;	
+        return student_sum;
+	end $$	
+delimiter ;
+
+select GetClassSumOver8(5);
+
+-- 7
+-- CREATE TRIGGER trigger_name
+-- BEFORE | AFTER INSERT | UPDATE | DELETE
+-- ON table_name
+-- FOR EACH ROW
+-- BEGIN
+    -- SQL statements to execute
+-- END;
+
+delimiter $$
+	create trigger trigger_backTo0
+    before insert on sinh_vien
+    for each row
+    begin
+		if new.diem < 0 then
+			set new.diem = 0;
+        end if;
+	end $$	
+delimiter ;
+delimiter $$
+	create trigger trigger_backTo0UpdateVer
+    before update on sinh_vien
+    for each row
+    begin
+		if new.diem < 0 then
+			set new.diem = 0;
+        end if;
+	end $$	
+delimiter ;
+
+select * from sinh_vien;
+insert into sinh_vien (ten, ma_lop, diem) values
+('Anh ấy rén', 2, -1);
+update sinh_vien set diem = -1 where ten = 'Anh ấy rén';
+
+-- 8
+create table log_sinhVien(
+	emp_id int,
+    old_name varchar(100),
+    old_maLop int,
+    new_diem float
+);
+
+delimiter $$
+	create trigger trigger_logUpdateSinhVien
+    after update on sinh_vien
+    for each row
+    begin
+		insert into log_sinhVien (emp_id, old_name, old_maLop, new_diem) values
+        (old.id, old.ten, old.ma_lop, new.diem);
+	end $$	
+delimiter ;
+
+update sinh_vien set diem = -1 where ten = 'Anh ấy rén';
+select * from log_sinhVien;
+
+-- 12
+delimiter $$
+	create procedure GetStudentListByClassID(class_id int)
+    begin
+		select * from sinh_vien
+        where ma_lop = class_id;
+    end $$
+delimiter ;
+
+call GetStudentListByClassID(3);
+
+-- 13
+delimiter $$
+	create procedure UpdateStudentScoreByID(student_id int, score float)
+    begin
+		update sinh_vien set diem = score
+        where id = student_id;
+    end $$
+delimiter ;
+
+call UpdateStudentScoreByID(2, 8.27);
+select * from sinh_vien;
+
+-- 14
+create view view_classOrder as
+select * from sinh_vien
+order by ma_lop;
+
+select * from view_classOrder;
+
+-- 15
+create view view_studentOver5 as
+select * from sinh_vien
+where diem >= 5;
+
+select * from view_studentOver5;
+
+-- 16
+select * from sinh_vien
+where ten like '%n%';
+
+-- 17
+select count(id) from sinh_vien
+group by ma_lop;
+
+-- 18
+select ma_lop, avg(diem) from sinh_vien
+group by ma_lop;
+
+-- 19
+select count(id) from sinh_vien
+where diem>= 8;
