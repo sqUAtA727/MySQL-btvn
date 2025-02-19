@@ -130,6 +130,44 @@ delimiter ;
 update sinh_vien set diem = -1 where ten = 'Anh ấy rén';
 select * from log_sinhVien;
 
+-- 9
+delimiter $$
+	create trigger trigger_noDeleteClassWithStudent
+    before delete on lop_hoc
+    for each row
+    begin 	
+		declare check_student int;
+		select count(*) into check_student from sinh_vien 
+        where ma_lop = old.id;
+        if (check_student > 0) then
+			signal sqlstate '45000'
+            set message_text = 'Nuh uh';
+        end if;
+	end $$	
+delimiter ;
+
+drop trigger trigger_noDeleteClassWithStudent;
+delete from lop_hoc where id = 1;
+select * from lop_hoc;
+
+-- 10
+delimiter $$
+	create trigger trigger_auto10IfScoreIsNull
+    before insert on sinh_vien
+    for each row
+    begin 	
+        if (new.diem is null) then
+			set new.diem = 10;
+        end if;
+	end $$	
+delimiter ;
+
+drop trigger trigger_auto10IfScoreIsNull;
+insert into sinh_vien (ten, ma_lop, diem) values
+('Nguyễn N', 1, null);
+select * from sinh_vien;
+delete from sinh_vien where diem is null;
+
 -- 12
 delimiter $$
 	create procedure GetStudentListByClassID(class_id int)
